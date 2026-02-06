@@ -47,16 +47,11 @@
             echo "Frontend: Node $(node --version)"
             echo ""
             echo "Comandos útiles:"
-            echo "  docker compose up -d   # Levantar servicios"
+            echo "  docker compose up -d  # Levantar servicios"
             echo "  poetry install        # Instalar dependencias Python"
             echo "  pnpm install          # Instalar dependencias Node"
             echo "  pnpm dev              # Levantar frontend en dev"
-            echo ""
-            echo "Sincroniza secretos automáticamente con Syncthing:"
-            echo "  1. syncthing &"
-            echo "  2. Abre http://localhost:8384 en tu navegador (UI de Syncthing)"
-            echo "  3. Solicitá el ID de OffShur3"
-            echo "  4. Solicita y acepta la carpeta /secrets o /env cuando te inviten"
+            echo "  syncthing &           # Sincroniza secretos automáticamente"
           '';
         };
       });

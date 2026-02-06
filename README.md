@@ -44,6 +44,16 @@ Esto activa un entorno con todas las dependencias necesarias para backend y fron
 
 ---
 
+### 1.5 Solicitar accesos
+Ejecutá Syncthing con `syncthing serve --no-browser &`
+Abre http://localhost:8384 en tu navegador (UI de Syncthing)"
+Solicitá el ID de OffShur3"
+Solicita y acepta la carpeta /secrets o /env cuando te inviten"
+
+Solicita por privado el acceso a notion para los objetivos y lineamientos del proyecto.
+
+---
+
 ### 2. Instalación de dependencias
 
 Con el entorno Nix activado, corre los siguientes comandos según el stack que quieras levantar:
