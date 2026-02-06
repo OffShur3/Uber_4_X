@@ -51,7 +51,7 @@ Abre http://localhost:8384 en tu navegador (UI de Syncthing)"
 
 Solicitá el ID de OffShur3"
 
-Solicita y acepta la carpeta /secrets o /env cuando te inviten"
+Solicita y acepta la carpeta /secrets cuando te inviten"
 
 
 
