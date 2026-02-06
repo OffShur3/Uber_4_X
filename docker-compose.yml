@@ -1,0 +1,84 @@
+# version: '3.8'  # Obsoleto en Docker Compose v2+
+
+services:
+  # Base de Datos
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: marketplace
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+      POSTGRES_DB: marketplace
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"  # Puerto externo 5433 para evitar conflicto con otro postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U marketplace"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API (Python/FastAPI)
+  backend:
+    build: ./backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://marketplace:${DB_PASSWORD:-changeme}@postgres:5432/marketplace
+      SECRET_KEY: ${BACKEND_SECRET_KEY:-changeme}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/src:/app/src:ro  # Montar código para desarrollo
+    command: uvicorn src.main:app --host 0.0.0.0 --reload  # --reload solo en dev
+
+  # Frontend PWA (SvelteKit)
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend
+    environment:
+      VITE_API_URL: http://localhost:8000  # Usado por el frontend en runtime
+    ports:
+      - "5173:5173"  # Dev
+      - "4173:4173"  # Preview
+    volumes:
+      - ./frontend/src:/app/src  # Hot reload en desarrollo
+      - ./frontend/static:/app/static
+    command: pnpm dev --host 0.0.0.0  # Cambiar a `pnpm build && pnpm preview` para prod
+
+  # Redis (para caché, colas, sesiones)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  # n8n (Automatizaciones - reemplaza AppScript)
+  n8n:
+    image: n8nio/n8n:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: marketplace
+      DB_POSTGRESDB_USER: marketplace
+      DB_POSTGRESDB_PASSWORD: ${DB_PASSWORD:-changeme}
+      N8N_BASIC_AUTH_ACTIVE: true
+      N8N_BASIC_AUTH_USER: admin
+      N8N_BASIC_AUTH_PASSWORD: ${N8N_PASSWORD:-changeme}
+    ports:
+      - "5678:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./infra/n8n:/data  # Para guardar workflows en Git
+
+volumes:
+  postgres_data:
+  redis_data:
+  n8n_data:
